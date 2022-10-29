@@ -35,17 +35,6 @@ make_subplots(;kwargs...) = plot(Layout(Subplots(;kwargs...)))
 
 @doc (@doc Subplots) make_subplots
 
-@enum RENDERERS IJULIA BROWSER
-
-const DEFAULT_RENDERER = Ref(BROWSER)
-
-function set_default_renderer(s::RENDERERS)
-    global DEFAULT_RENDERER
-    DEFAULT_RENDERER[] = s
-end
-
-@inline get_renderer() = DEFAULT_RENDERER[]
-
 list_datasets() = readdir(joinpath(artifact"plotly-artifacts", "datasets"))
 function check_dataset_exists(name::String)
     ds = list_datasets()
@@ -75,24 +64,6 @@ function __init__()
     _build_log = joinpath(_pkg_root, "deps", "build.log")
     if isfile(_build_log) && occursin("Warning:", read(_build_log, String))
         @warn("Warnings were generated during the last build of PlotlyJS:  please check the build log at $_build_log")
-    end
-
-    # set default renderer
-    # First check env var
-    env_val = get(ENV, "PLOTLY_RENDERER_JULIA", missing)
-    if !ismissing(env_val)
-        env_symbol = Symbol(uppercase(env_val))
-        options = Dict(v => k for (k, v) in collect(Base.Enums.namemap(PlotlyJS.RENDERERS)))
-        renderer_int = get(options, env_symbol, missing)
-        if ismissing(renderer_int)
-            @warn "Unknown value for env var `PLOTLY_RENDERER_JULIA` \"$(env_val)\", known options are $(string.(keys(options)))"
-        else
-            set_default_renderer(RENDERERS(renderer_int))
-        end
-    else
-        # we have no env-var
-        # check IJULIA
-        isdefined(Main, :IJulia) && Main.IJulia.inited && set_default_renderer(IJULIA)
     end
 
     @require JSON2 = "2535ab7d-5cd8-5a07-80ac-9b1792aadce3" JSON2.write(io::IO, p::SyncPlot) = JSON2.write(io, p.plot)
