@@ -18,10 +18,7 @@ function Base.show(io::IO, mm::MIME"text/html", p::SyncPlot)
 end
 Base.show(io::IO, mm::MIME"application/prs.juno.plotpane+html", p::SyncPlot) = show(io, mm, p.scope)
 
-function SyncPlot(
-        p::Plot;
-        kwargs...
-    )
+function SyncPlot(p::Plot)
     lowered = JSON.lower(p)
     id = string("#plot-", p.divid)
 
