@@ -8,15 +8,26 @@ end
 
 Base.getindex(p::SyncPlot, key) = p.scope[key] # look up Observables
 
-@WebIO.register_renderable(SyncPlot) do plot
-    return WebIO.render(plot.scope)
+function WebIO.render(plot::SyncPlot)
+    return WebIO.render(redisplay!(plot).scope)
 end
+@register_renderable SyncPlot
 
 function Base.show(io::IO, mm::MIME"text/html", p::SyncPlot)
-    # if we are rendering docs -- short circuit and display html
     show(io, mm, p.scope)
 end
+
+function Base.show(io::IO, ::MIME"application/vnd.plotly.v1+json", p::SyncPlot)
+    print(io, JSON.lower(p))
+end
+
 Base.show(io::IO, mm::MIME"application/prs.juno.plotpane+html", p::SyncPlot) = show(io, mm, p.scope)
+
+for mime in ["text/plain", "application/prs.juno.plotpane+html"]
+    function Base.show(io::IO, m::MIME{Symbol(mime)}, p::SyncPlot, args...)
+        show(io, m, p.plot, args...)
+    end
+end
 
 function SyncPlot(p::Plot)
     lowered = JSON.lower(p)
@@ -314,13 +325,6 @@ for f in (:extendtraces!, :prependtraces!)
                       maxpoints=-1)
             ($f)(p, update, [ind], maxpoints)
         end
-    end
-end
-
-
-for mime in ["text/plain", "application/prs.juno.plotpane+html"]
-    function Base.show(io::IO, m::MIME{Symbol(mime)}, p::SyncPlot, args...)
-        show(io, m, p.plot, args...)
     end
 end
 

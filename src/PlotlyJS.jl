@@ -5,8 +5,9 @@ using Reexport
 @reexport using PlotlyBase
 using PlotlyKaleido: PlotlyKaleido
 using JSON
-using WebIO
-using REPL, Pkg, Pkg.Artifacts, DelimitedFiles  # stdlib
+using WebIO, Observables
+using WebIO: @register_renderable
+using REPL, Pkg, Pkg.Artifacts, DelimitedFiles, UUIDs  # stdlib
 
 # need to import some functions because methods are meta-generated
 import PlotlyBase:
@@ -75,32 +76,9 @@ function __init__()
         @warn("Warnings were generated during the last build of PlotlyJS:  please check the build log at $_build_log")
     end
 
-    if ccall(:jl_generating_output, Cint, ()) != 1
-        # ensure precompilation of packages depending on PlotlyJS finishes
-        PlotlyKaleido.start()
-    end
-
     if !isfile(_js_path)
         @info("plotly.js javascript libary not found -- downloading now")
         include(joinpath(_pkg_root, "deps", "build.jl"))
-    end
-
-    # set default renderer
-    # First check env var
-    env_val = get(ENV, "PLOTLY_RENDERER_JULIA", missing)
-    if !ismissing(env_val)
-        env_symbol = Symbol(uppercase(env_val))
-        options = Dict(v => k for (k, v) in collect(Base.Enums.namemap(PlotlyJS.RENDERERS)))
-        renderer_int = get(options, env_symbol, missing)
-        if ismissing(renderer_int)
-            @warn "Unknown value for env var `PLOTLY_RENDERER_JULIA` \"$(env_val)\", known options are $(string.(keys(options)))"
-        else
-            set_default_renderer(RENDERERS(renderer_int))
-        end
-    else
-        # we have no env-var
-        # check IJULIA
-        isdefined(Main, :IJulia) && Main.IJulia.inited && set_default_renderer(IJULIA)
     end
 
     # set up display
