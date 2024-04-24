@@ -29,7 +29,46 @@ for mime in ["text/plain", "application/prs.juno.plotpane+html"]
     end
 end
 
-function SyncPlot(p::Plot)
+function redisplay!(p::SyncPlot)
+    obshover = Observable(Dict())
+    hoverlisteners = map(last, Observables.listeners(p.scope["hover"]))
+    if !isempty(hoverlisteners)
+        off.(Ref(p.scope["hover"]), hoverlisteners)
+        on.(hoverlisteners, Ref(obshover))
+    end
+
+    obsselected = Observable(Dict())
+    selectlisteners = map(last, Observables.listeners(p.scope["selected"]))
+    if !isempty(selectlisteners)
+        off.(Ref(p.scope["selected"]), selectlisteners)
+        on.(selectlisteners, Ref(obsselected))
+    end
+
+    obsclick = Observable(Dict())
+    clicklisteners = map(last, Observables.listeners(p.scope["click"]))
+    if !isempty(clicklisteners)
+        off.(Ref(p.scope["click"]), clicklisteners)
+        on.(clicklisteners, Ref(obsclick))
+    end
+
+    obsrelayout = Observable(Dict())
+    relayoutlisteners = map(last, Observables.listeners(p.scope["relayout"]))
+    if !isempty(relayoutlisteners)
+        off.(Ref(p.scope["relayout"]), relayoutlisteners)
+        on.(relayoutlisteners, Ref(obsrelayout))
+    end
+
+    p.scope = syncplot_scope(p.plot; obshover, obsselected, obsclick, obsrelayout)
+
+    return p
+end
+
+function syncplot_scope(p::Plot;
+    obshover=Observable(Dict()),
+    obsselected=Observable(Dict()),
+    obsclick=Observable(Dict()),
+    obsrelayout=Observable(Dict())
+)
     lowered = JSON.lower(p)
     id = string("#plot-", p.divid)
 
@@ -42,10 +81,10 @@ function SyncPlot(p::Plot)
     scope.dom = dom"div"(id=string("plot-", p.divid))
 
     # INPUT: Observables for plot events
-    scope["hover"] = Observable(Dict())
-    scope["selected"] = Observable(Dict())
-    scope["click"] = Observable(Dict())
-    scope["relayout"] = Observable(Dict())
+    scope["hover"] = obshover
+    scope["selected"] = obsselected
+    scope["click"] = obsclick
+    scope["relayout"] = obsrelayout
     scope["image"] = Observable("")
     scope["__gd_contents"] = Observable{Any}(Dict())  # for testing
 
@@ -149,6 +188,12 @@ function SyncPlot(p::Plot)
     # create no-op `on` callback for image so it is _always_ sent
     # to us
     on(scope["image"]) do x end
+
+    return scope
+end
+
+function SyncPlot(p::Plot)
+    scope = syncplot_scope(p)
 
     SyncPlot(p, scope)
 end
