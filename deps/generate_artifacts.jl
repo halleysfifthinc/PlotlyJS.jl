@@ -1,5 +1,5 @@
 # This script gets run once, on a developer's machine, to generate artifacts
-using Pkg.Artifacts
+using LazyArtifacts
 using Downloads
 
 ver = include("./plotly_cdn_version.jl")

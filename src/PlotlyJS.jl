@@ -1,13 +1,12 @@
 module PlotlyJS
 
-using Base64
 using Reexport
 @reexport using PlotlyBase
 using PlotlyKaleido: PlotlyKaleido
 using JSON
 using WebIO, Observables
 using WebIO: @register_renderable
-using REPL, Pkg, Pkg.Artifacts, DelimitedFiles, UUIDs  # stdlib
+using Base64, REPL, LazyArtifacts, DelimitedFiles, UUIDs  # stdlib
 
 # need to import some functions because methods are meta-generated
 import PlotlyBase:
@@ -19,7 +18,6 @@ import PlotlyBase:
 
 using JSExpr
 using JSExpr: @var, @new
-using Pkg.Artifacts
 if !isdefined(Base, :get_extension)
     using Requires
 end

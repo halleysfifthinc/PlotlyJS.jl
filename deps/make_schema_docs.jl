@@ -3,7 +3,7 @@ module PlotlyJSSchemaDocsGenerator
 import Markdown
 using Markdown: MD
 using JSON
-using Pkg.Artifacts
+using LazyArtifacts
 
 # methods to re-construct a plot from JSON
 _symbol_dict(x) = x
