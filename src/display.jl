@@ -307,13 +307,22 @@ function to_image(plt::SyncPlot; kwargs...)
     plt.scope["image"][] = ""  # reset
     plt.scope["_toImage"][] = Dict(kwargs)
 
-    tries = 0
-    while length(plt.scope["image"][]) == 0
-        tries == 10 && error("Could not get image")
-        sleep(0.25)
-        tries += 1
+    # The plt["image"] observable is updated by WebIO from the browser via a synchronous
+    # IJulia comm which does not run until the current cell finishes running (i.e.
+    # `plt["image"]` is set *after* this function and the cell its called from return)
+    # So `plt["image"]` will never update while we're in this function, and we should skip
+    # the wait and immediately return (erroneously empty, in most cases)
+    if !isdefined(Main, :IJulia)
+        tries = 0
+        while isempty(plt.scope["image"][])
+            tries == 10 && error("Could not get image")
+            sleep(0.25)
+            tries += 1
+            yield()
+        end
     end
-    return plt["image"].val
+
+    return plt["image"][]
 end
 
 function download_image(plt::SyncPlot; kwargs...)
