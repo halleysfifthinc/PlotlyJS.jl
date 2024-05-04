@@ -1,5 +1,8 @@
 using PlotlyKaleido: kill, is_running, start, restart, ALL_FORMATS, TEXT_FORMATS
 
+# start() is a no-op if kaleido is already running
+_ensure_kaleido_running() = start(;plotly_version=_js_version)
+
 savefig(p::SyncPlot; kwargs...) = savefig(p.plot; kwargs...)
 
 function savefig(
@@ -120,8 +123,6 @@ function savefig(
     end
     return fn
 end
-
-_ensure_kaleido_running() = !is_running() && restart()
 
 const _KALEIDO_MIMES = Dict(
     "application/pdf" => "pdf",

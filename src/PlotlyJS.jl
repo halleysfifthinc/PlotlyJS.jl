@@ -76,9 +76,9 @@ function __init__()
         @warn("Warnings were generated during the last build of PlotlyJS:  please check the build log at $_build_log")
     end
 
-    if !isfile(_js_path)
-        @info("plotly.js javascript libary not found -- downloading now")
-        include(joinpath(_pkg_root, "deps", "build.jl"))
+    if ccall(:jl_generating_output, Cint, ()) != 1
+        # ensure precompilation of packages depending on PlotlyJS finishes
+        @async PlotlyKaleido.start()
     end
 
     # set up display
