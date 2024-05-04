@@ -19,8 +19,19 @@ function savefig(
     # construct payload
     _get(x, def) = x === nothing ? def : x
     payload = Dict(
-        :width => _get(width, 700),
-        :height => _get(height, 500),
+        # set `width` and `height` to kwarg, layout value, layout template value, or
+        # default, in order of priority
+        :width => _get(                               width,
+            haskey(p.layout, :width) ?                p.layout.width :
+            (haskey(p.layout, :template) &&
+                haskey(p.layout.template, :width)) ?  p.layout.template.width :
+                                                      700),
+
+        :height => _get(                              height,
+            haskey(p.layout, :height) ?               p.layout.height :
+            (haskey(p.layout, :template) &&
+                haskey(p.layout.template, :height)) ? p.layout.template.height :
+                                                      500),
         :scale => _get(scale, 1),
         :format => format,
         :data => p
