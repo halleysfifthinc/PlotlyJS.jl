@@ -76,7 +76,7 @@ function __init__()
 
     if ccall(:jl_generating_output, Cint, ()) != 1
         # ensure precompilation of packages depending on PlotlyJS finishes
-        @async PlotlyKaleido.start()
+        @async PlotlyKaleido.start(plotlyjs=_js_path)
     end
 
     # set up display

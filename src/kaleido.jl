@@ -1,7 +1,7 @@
 using PlotlyKaleido: kill, is_running, start, restart, ALL_FORMATS, TEXT_FORMATS
 
 # start() is a no-op if kaleido is already running
-_ensure_kaleido_running() = start(;plotly_version=_js_version)
+_ensure_kaleido_running(; kwargs...) = start(;plotly_version=_js_version, plotlyjs=_js_path, kwargs...)
 
 savefig(p::SyncPlot; kwargs...) = savefig(p.plot; kwargs...)
 
