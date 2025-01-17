@@ -77,8 +77,7 @@ function syncplot_scope(p::Plot;
         "Plotly" => _js_path,
         joinpath(@__DIR__, "..", "assets", "plotly_webio.bundle.js")
     ]
-    scope = Scope(imports=deps)
-    scope.dom = dom"div"(id=string("plot-", p.divid))
+    scope = Scope(;dom=Node(:div; id=string("plot-", p.divid)), imports=deps)
 
     # INPUT: Observables for plot events
     scope["hover"] = obshover
