@@ -64,10 +64,10 @@ function redisplay!(p::SyncPlot)
 end
 
 function syncplot_scope(p::Plot;
-    obshover=Observable(Dict()),
-    obsselected=Observable(Dict()),
-    obsclick=Observable(Dict()),
-    obsrelayout=Observable(Dict())
+    obshover=Observable{Dict{Any,Any}}(Dict()),
+    obsselected=Observable{Dict{Any,Any}}(Dict()),
+    obsclick=Observable{Dict{Any,Any}}(Dict()),
+    obsrelayout=Observable{Dict{Any,Any}}(Dict())
 )
     lowered = JSON.lower(p)
     id = string("#plot-", p.divid)
@@ -85,14 +85,14 @@ function syncplot_scope(p::Plot;
     scope["selected"] = obsselected
     scope["click"] = obsclick
     scope["relayout"] = obsrelayout
-    scope["image"] = Observable("")
+    scope["image"] = Observable{String}("")
     scope["__gd_contents"] = Observable{Any}(Dict())  # for testing
 
     # OUTPUT: setup an observable which sends modify commands
     scope["_commands"] = Observable{Any}([])
-    scope["_toImage"] = Observable(Dict())
-    scope["_downloadImage"] = Observable(Dict())
-    scope["__get_gd_contents"] = Observable("")
+    scope["_toImage"] = Observable{Dict{Any,Any}}(Dict())
+    scope["_downloadImage"] = Observable{Dict{Any,Any}}(Dict())
+    scope["__get_gd_contents"] = Observable{String}("")
 
     onjs(scope["_toImage"], @js function (options)
         this.Plotly.toImage(this.plotElem, options).then(function (data)
