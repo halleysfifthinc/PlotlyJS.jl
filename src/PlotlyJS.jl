@@ -6,6 +6,7 @@ using PlotlyKaleido: PlotlyKaleido
 using JSON
 using WebIO, Observables
 using WebIO: @register_renderable
+using PrecompileTools
 using Base64, REPL, LazyArtifacts, DelimitedFiles, UUIDs  # stdlib
 
 # need to import some functions because methods are meta-generated
@@ -115,6 +116,15 @@ for k in [:add_hrect!, :add_hline!, :add_vrect!, :add_vline!, :add_shape!, :add_
     @eval function PlotlyBase.$(k)(p::SyncPlot, args...;kwargs...)
         $(k)(p.plot, args...; kwargs...)
         send_command(p.scope, :react, p.plot.data, p.plot.layout)
+    end
+end
+
+@setup_workload begin
+    y = rand(5)
+    x = collect(1:5)
+    trace = scatter(;x, y)
+    @compile_workload begin
+        plot(trace)
     end
 end
 
