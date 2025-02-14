@@ -1,7 +1,7 @@
 using PlotlyKaleido: kill, is_running, start, restart, ALL_FORMATS, TEXT_FORMATS
 
 # start() is a no-op if kaleido is already running
-_ensure_kaleido_running(; kwargs...) = start(;plotly_version=_js_version, plotlyjs=_js_path, kwargs...)
+_ensure_kaleido_running(; kwargs...) = !is_running() && restart(;plotly_version=_js_version, plotlyjs=_js_path, kwargs...)
 
 savefig(p::SyncPlot; kwargs...) = savefig(p.plot; kwargs...)
 
@@ -134,8 +134,6 @@ function savefig(
     end
     return fn
 end
-
-_ensure_kaleido_running(; kwargs...) = !is_running() && restart(;plotly_version=_js_version, plotlyjs=_js_path, kwargs...)
 
 const _KALEIDO_MIMES = Dict(
     "application/pdf" => "pdf",
